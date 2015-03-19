@@ -1,0 +1,2 @@
+This python library allows to manage a vtun service (client or server) from python.
+It was initially developped as part of the remote access project (http://sirius.limousin.fr.grpleg.com/confluence/display/PRJACCESDISTANT)
