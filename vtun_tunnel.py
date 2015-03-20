@@ -231,6 +231,17 @@ class ServerVtunTunnel(VtunTunnel):
         config += ' };\n'
         config += '}\n'
         return config
+        
+        def start(self):
+            """ Start a vtun server process to handle the service represented by this object
+            """
+            print('Starting vtun server with tunnel name ' + str(self.vtun_tunnel_name) + ' (doing nothing)!')
+            print('Config file for vtund would be "' + self.to_vtund_config() + '"')
+        
+        def stop(self):
+            """ Stop the vtun server process handled by this object
+            """
+            print('Stopping vtun server with tunnel name ' + str(self.vtun_tunnel_name) + ' (doing nothing)!')
 
 class ClientVtunTunnel(VtunTunnel):
     
