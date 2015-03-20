@@ -260,27 +260,6 @@ class ClientVtunTunnel(VtunTunnel):
         """
         self.vtun_server_hostname = vtun_server_hostname
     
-    def to_tundev_shell_output(self):
-        """ Generate a tundev shell output configuration string matching with this object's attributes
-        
-        This can directly be output in the tundevl shell for the tunnelling device to know which client vtun configuration to apply
-        
-        \return A string containing a tundev shell output configuration
-        """
-        # In shell output, we actually do not specify the vtun_server_hostname, because it is assumed to be tunnelled inside ssh (it is thus localhost)
-        message = ''
-        message += 'tunnel_ip_network: ' + str(self.tunnel_ip_network.network) + '\n'
-        message += 'tunnel_ip_prefix: /' + str(self.tunnel_ip_network.prefixlen) + '\n'
-        message += 'tunnel_ip_netmask: ' + str(self.tunnel_ip_network.netmask) + '\n'
-        message += 'tunnelling_dev_ip_address: ' + str(self.tunnel_near_end_ip) + '\n'
-        message += 'rdv_server_ip_address: ' + str(self.tunnel_far_end_ip) + '\n'
-        message += 'tunnel_secret: ' + str(self.tunnel_key) + '\n'
-        if self.vtun_server_tcp_port is None:
-            raise Exception('TcpPortCannotBeNone')
-        else:
-            message += 'rdv_server_vtun_tcp_port: ' + str(self.vtun_server_tcp_port)
-        return message
-
     def from_tundev_shell_ouput(self, tundev_shell_config):
         """ Set this object tunnel parameters from a string following the tundev shell output format of the command 'get_vtun_parameters'
         \param tundev_shell_config
