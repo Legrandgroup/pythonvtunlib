@@ -8,13 +8,14 @@ import ipaddr
 
 class TunnelMode(object):
     def __init__(self, mode):
-        """ Class constructor
-        mode is a string reprensenting the tunnel mode. Supported values are L2, L3 and L3_multi
+        """ Constructor
+        \param mode A string representing the tunnel mode. Supported values are L2, L3 and L3_multi
         """
         self.set_mode(mode)
     
     def set_mode(self, mode):
-        """ Set the tunnel mode to mode. Supported values are L2, L3 and L3_multi
+        """ Set the tunnel mode
+        \param mode The mode to use on this tunnel. Supported values are L2, L3 and L3_multi
         """
         if mode == 'L2' or mode == 'L3' or mode == 'L3_multi':
             self._mode = mode
@@ -23,6 +24,15 @@ class TunnelMode(object):
     
     def get_mode(self):
         return self._mode
+        
+    def get_equivalent_vtun_type(self):
+        if self._mode == 'L2':
+            return 'tap'
+        if self._mode == 'L3' or self._mode == 'L3_multi':
+            return 'tun'
+        else:
+            raise Exception('InvalidTunnelMode:' + str(self._mode))
+        
         
     def __str__(self):
         return self.get_mode()
@@ -44,6 +54,7 @@ class VtunTunnel(object):
         self._vtun_pid = None    # The PID of the slave vtun process handling this tunnel
         self._vtun_process = None    # The python process object handling this tunnel
         
+        self.vtun_tunnel_name = None
         arg_mode = kwargs.get('mode', None) # Type of tunnel (L2, L3 or L3_multi)
         arg_tunnel_ip_network = kwargs.get('tunnel_ip_network', None) # IP network (range) for the addressing within the tunnel
         arg_tunnel_near_end_ip = kwargs.get('tunnel_near_end_ip', None) # IP address of the near end of the tunnel (internal to the tunnel)
@@ -88,10 +99,13 @@ class VtunTunnel(object):
             else:
                 raise Exception('InvalidTcpPort:' + str(tcp_port))
 
-    def set_characteristics_from_string(self, tundev_shell_config):
-        """ Set this object tunnel parameters from a string following the tundev shell output format of the command 'get_vtun_parameters'
+    def set_shared_secret(self, key):
+        """ Set the shared secret for vtun
         """
-        raise Exception('NotYesImplemented')
+        self.tunnel_key = key
+    
+    def set_tunnel_name(self, name):
+        self.vtun_tunnel_name = name
     
     def is_valid(self):
         """ Check if our attributes are enough to define a vtun tunnel
@@ -105,6 +119,10 @@ class VtunTunnel(object):
             return False
         if self.tunnel_far_end_ip is None:
             return False
+        if self.tunnel_key is None:
+            return False
+        if self.vtun_tunnel_name is None:
+            return False
         # Note: vtun_server_tcp_port is not stricly required to define a valid the tunnel (but it will be to start it)
         return True
     
@@ -112,11 +130,13 @@ class VtunTunnel(object):
         """ Generate a vtund config matching with the state of this object and return it as a string
         """
         pass    # 'virtual' method
-        
+    
     def start(self):
         if not (self._vtun_pid is None and self._vtun_process is None):    # There is already a slave vtun process running
             raise Exception('VtundAlreadyRunning')
         vtund_config = self.to_vtund_config()
+        print('Debug: will use the following vtund config:')
+        print(vtund_config)
         # Save into a file
         # Run the process on the file
         raise Exception('NotYetImplemented')
@@ -130,6 +150,61 @@ class ServerVtunTunnel(VtunTunnel):
     """ Class representing a vtun tunnel service (listening) """
     def __init__(self, **kwargs): # See VtunTunnel.__init__ for the inherited kwargs
         super(ServerVtunTunnel, self).__init__(**kwargs)
+        self.restricted_iface = None
+        self.vtun_protocol = kwargs.get('vtun_protocol', 'tcp')  # valid values are tcp or udp
+        self.vtun_compression = kwargs.get('vtun_compression', 'lzo:9') # See vtun documentation for valid values
+        self.vtun_encryption = kwargs.get('vtun_encryption', False) 
+        self.vtun_keepalive = kwargs.get('vtun_keepalive', True)
+
+    def restrict_server_to_iface(self, iface):
+        self.restricted_iface = iface
+    
+    #~ def is_valid(self): # Overload is_valid() for server tunnels...
+        #~ """ Check if our attributes are enough to define a vtun tunnel server
+        #~ Returns True if all minimum attributes are set
+        #~ """
+        #~ if not super(ServerVtunTunnel, self).is_valid():    # First ask parent's is_valid()
+            #~ return False
+        #~ return True
+
+    def to_vtund_config(self):
+        config = ''
+        config += 'options {\n'
+        config += ' port ' + str(self.vtun_server_tcp_port) + ';\n'
+        if self.restricted_iface:
+            config += ' bindaddr { iface ' + self.restricted_iface + '; };\n'
+        config += 'syslog daemon;\n'
+        
+        config += 'ppp /usr/sbin/pppd;\n'
+        config += 'ifconfig /sbin/ifconfig;\n'
+        config += 'route /sbin/route;\n'
+        config += 'ip /sbin/ip;\n'
+        config += '}\n'
+        config += '\n'
+        config += self.vtun_tunnel_name + ' {\n'
+        config += ' passwd ' + str(self.tunnel_key) + ';\n'
+        config += ' type ' + self.tunnel_mode.get_equivalent_vtun_type() + ';\n'
+        config += ' proto ' + self.vtun_protocol + ';\n'
+        config += ' compress ' + self.vtun_compression + ';\n'
+        config += ' encrypt '
+        if self.vtun_encryption:
+            config += 'yes'
+        else:
+            config += 'no'
+        config += ';\n'
+        config += ' keepalive '
+        if self.vtun_keepalive:
+            config += 'yes'
+        else:
+            config += 'no'
+        config += ';\n'
+        
+        config += ' \n'
+        config += ' up {\n'
+        config += '  ifconfig "%% ' + str(self.tunnel_near_end_ip) + ' pointtopoint ' + str(self.tunnel_far_end_ip) + ' mtu 1450";\n'
+        config += ' };\n'
+        config += '}\n'
+        return config
 
 class ClientVtunTunnel(VtunTunnel):
     """ Class representing a vtun tunnel client (connecting) """
@@ -163,8 +238,37 @@ class ClientVtunTunnel(VtunTunnel):
         else:
             message += 'rdv_server_vtun_tcp_port: ' + str(self.vtun_server_tcp_port)
         return message
+
+    def from_tundev_shell_ouput(self, tundev_shell_config):
+        """ Set this object tunnel parameters from a string following the tundev shell output format of the command 'get_vtun_parameters'
+        Fixme: move this into ClientVtunTunnel's consctructor
+        """
+        raise Exception('NotYesImplemented')
+    
+    def to_vtund_config(self):
+        config = ''
+        config += 'options {\n'
+        config += ' port ' + str(self.vtun_server_tcp_port) + ';\n'
+        config += ' timeout ' + str(self.vtun_connection_timeout) + ';\n'
         
-    def is_valid(self): # Overload is_valid() for client tunnels... we also need a vtun_server_hostname and a vtun_server_tcp_port
+        config += 'ppp /usr/sbin/pppd;\n'
+        config += 'ifconfig /sbin/ifconfig;\n'
+        config += 'route /sbin/route;\n'
+        config += 'ip /sbin/ip;\n'
+        config += '}\n'
+        config += '\n'
+        config += self.vtun_tunnel_name + ' {\n'
+        config += ' passwd ' + str(self.tunnel_key) + ';\n'
+        config += ' persist no;\n'
+        config += ' \n'
+        config += ' up {\n'
+        config += '  ifconfig "%% ' + str(self.tunnel_near_end_ip) + ' pointtopoint ' + str(self.tunnel_far_end_ip) + ' mtu 1450";\n'
+        config += ' };\n'
+        config += '}\n'
+        return config
+        return config_file  # TODO
+    
+    def is_valid(self): # Overload is_valid() for client tunnels... we also need a vtun_server_hostname
         """ Check if our attributes are enough to define a vtun tunnel
         Returns True if all minimum attributes are set
         """
