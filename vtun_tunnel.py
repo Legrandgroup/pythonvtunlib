@@ -154,14 +154,15 @@ class VtunTunnel(object):
         print(vtund_config)
         # Save into a file
         # Run the process on the file
-        raise Exception('NotYetImplemented')
+        #raise Exception('NotYetImplemented')
     
     def stop(self):
         """ Start the vtund exec (generic for server or client)
         """
         # Check PID and subprocess
         # Kill them, remove the temporary config file
-        raise Exception('NotYetImplemented')
+        pass
+        #raise Exception('NotYetImplemented')
 
 class ServerVtunTunnel(VtunTunnel):
     """ Class representing a vtun tunnel service (listening) """
