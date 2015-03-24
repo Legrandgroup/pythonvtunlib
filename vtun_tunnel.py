@@ -161,7 +161,7 @@ class VtunTunnel(object):
         """
         # Check PID and subprocess
         # Kill them, remove the temporary config file
-        pass
+        print('Debug: will stop vtun')
         #raise Exception('NotYetImplemented')
 
 class ServerVtunTunnel(VtunTunnel):
