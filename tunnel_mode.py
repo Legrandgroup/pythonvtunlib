@@ -29,7 +29,7 @@ class TunnelMode(object):
         \return A vtun type (as used in vtund configuration) as a string
         """
         if self._mode == 'L2':
-            return 'tap'
+            return 'ether'
         if self._mode == 'L3' or self._mode == 'L3_multi':
             return 'tun'
         else:
