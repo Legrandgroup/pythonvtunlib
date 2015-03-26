@@ -37,42 +37,44 @@ class ServerVtunTunnel(VtunTunnel):
         
         \return A string containing a configuration to provide to the vtund exec
         """
+        indent_unit = '\t'
+        cr_lf = '\r\n';
         config = ''
-        config += 'options {\n'
-        config += ' port ' + str(self.vtun_server_tcp_port) + ';\n'
+        config += 'options {' + cr_lf
+        config += indent_unit + 'port ' + str(self.vtun_server_tcp_port) + ';' + cr_lf
         if self.restricted_iface:
-            config += ' bindaddr { iface ' + self.restricted_iface + '; };\n'
-        config += 'syslog daemon;\n'
+            config += indent_unit + 'bindaddr { iface ' + self.restricted_iface + '; };' + cr_lf
+        config += indent_unit + 'syslog daemon;' + cr_lf
         
-        config += 'ppp /usr/sbin/pppd;\n'
-        config += 'ifconfig /sbin/ifconfig;\n'
-        config += 'route /sbin/route;\n'
-        config += 'ip /sbin/ip;\n'
-        config += '}\n'
-        config += '\n'
-        config += self.vtun_tunnel_name + ' {\n'
-        config += ' passwd ' + str(self.tunnel_key) + ';\n'
-        config += ' type ' + self.tunnel_mode.get_equivalent_vtun_type() + ';\n'
-        config += ' proto ' + self.vtun_protocol + ';\n'
-        config += ' compress ' + self.vtun_compression + ';\n'
-        config += ' encrypt '
+        config += indent_unit + 'ppp /usr/sbin/pppd;' + cr_lf
+        config += indent_unit + 'ifconfig /sbin/ifconfig;' + cr_lf
+        config += indent_unit + 'route /sbin/route;' + cr_lf
+        config += indent_unit + 'ip /sbin/ip;' + cr_lf
+        config += '}' + cr_lf
+        config += cr_lf
+        config += self.vtun_tunnel_name + ' {' + cr_lf
+        config += indent_unit + 'passwd ' + str(self.tunnel_key) + ';' + cr_lf
+        config += indent_unit + 'type ' + self.tunnel_mode.get_equivalent_vtun_type() + ';' + cr_lf
+        config += indent_unit + 'proto ' + self.vtun_protocol + ';' + cr_lf
+        config += indent_unit + 'compress ' + self.vtun_compression + ';' + cr_lf
+        config += indent_unit + 'encrypt '
         if self.vtun_encryption:
             config += 'yes'
         else:
             config += 'no'
-        config += ';\n'
-        config += ' keepalive '
+        config += ';' + cr_lf
+        config += indent_unit + 'keepalive '
         if self.vtun_keepalive:
             config += 'yes'
         else:
             config += 'no'
-        config += ';\n'
+        config += ';' + cr_lf
         
-        config += ' \n'
-        config += ' up {\n'
-        config += '  ifconfig "%% ' + str(self.tunnel_near_end_ip) + ' pointtopoint ' + str(self.tunnel_far_end_ip) + ' mtu 1450";\n'
-        config += ' };\n'
-        config += '}\n'
+        config += ' ' + cr_lf
+        config += indent_unit + 'up {' + cr_lf
+        config += indent_unit*2 + 'ifconfig "%% ' + str(self.tunnel_near_end_ip) + ' pointtopoint ' + str(self.tunnel_far_end_ip) + ' mtu 1450";' + cr_lf
+        config += indent_unit + '};' + cr_lf
+        config += '}' + cr_lf
         return config
         
         def start(self):
