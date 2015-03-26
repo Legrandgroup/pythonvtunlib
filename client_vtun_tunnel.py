@@ -41,7 +41,7 @@ class ClientVtunTunnel(VtunTunnel):
         \return A string containing a configuration to provide to the vtund exec
         """
         indent_unit = '\t'
-        cr_lf = '\r\n';
+        cr_lf = '\n';
         config = ''
         config += 'options {' + cr_lf
         config += indent_unit + 'port ' + str(self.vtun_server_tcp_port) + ';' + cr_lf
