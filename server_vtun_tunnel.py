@@ -4,7 +4,7 @@
 
 from __future__ import print_function
 
-from vtun_tunnel.py import VtunTunnel
+from vtun_tunnel import VtunTunnel
 
 class ServerVtunTunnel(VtunTunnel):
     """ Class representing a vtun tunnel service (listening) """

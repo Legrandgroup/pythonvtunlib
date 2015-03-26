@@ -6,7 +6,7 @@ from __future__ import print_function
 
 import ipaddr
 
-from tunnel_mode.py import TunnelMode
+from tunnel_mode import TunnelMode
 
 class VtunTunnel(object):
     """ Class representing a vtun tunnel """

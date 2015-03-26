@@ -4,7 +4,7 @@
 
 from __future__ import print_function
 
-from vtun_tunnel.py import VtunTunnel
+from vtun_tunnel import VtunTunnel
 
 class ClientVtunTunnel(VtunTunnel):
     
@@ -50,7 +50,8 @@ class ClientVtunTunnel(VtunTunnel):
         config = ''
         config += 'options {\n'
         config += ' port ' + str(self.vtun_server_tcp_port) + ';\n'
-        config += ' timeout ' + str(self.vtun_connection_timeout) + ';\n'
+        #FIXME: add vtun_connection_timeout attribute! config += ' timeout ' + str(self.vtun_connection_timeout) + ';\n'
+        config += ' timeout 600;\n'
         
         config += 'ppp /usr/sbin/pppd;\n'
         config += 'ifconfig /sbin/ifconfig;\n'
