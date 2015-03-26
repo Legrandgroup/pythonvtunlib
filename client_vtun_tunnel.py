@@ -60,7 +60,7 @@ class ClientVtunTunnel(VtunTunnel):
         config += indent_unit + 'persist no;' + cr_lf
         config += cr_lf
         config += indent_unit + 'up {' + cr_lf
-        config += indent_unit * 2  + 'ifconfig "%% ' + str(self.tunnel_near_end_ip) + ' pointtopoint ' + str(self.tunnel_far_end_ip) + ' mtu 1450";' + cr_lf
+        config += indent_unit * 2  + 'ifconfig "%% ' + str(self.tunnel_near_end_ip) + ' pointopoint ' + str(self.tunnel_far_end_ip) + ' mtu 1450";' + cr_lf
         config += indent_unit + '};' + cr_lf
         config += '}' + cr_lf
         return config
