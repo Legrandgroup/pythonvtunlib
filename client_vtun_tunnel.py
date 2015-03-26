@@ -40,26 +40,29 @@ class ClientVtunTunnel(VtunTunnel):
         
         \return A string containing a configuration to provide to the vtund exec
         """
+        indent_unit = '\t'
+        cr_lf = '\r\n';
         config = ''
-        config += 'options {\n'
-        config += ' port ' + str(self.vtun_server_tcp_port) + ';\n'
+        config += 'options {' + cr_lf
+        config += indent_unit + 'port ' + str(self.vtun_server_tcp_port) + ';' + cr_lf
         #FIXME: add vtun_connection_timeout attribute! config += ' timeout ' + str(self.vtun_connection_timeout) + ';\n'
-        config += ' timeout 600;\n'
         
-        config += 'ppp /usr/sbin/pppd;\n'
-        config += 'ifconfig /sbin/ifconfig;\n'
-        config += 'route /sbin/route;\n'
-        config += 'ip /sbin/ip;\n'
-        config += '}\n'
-        config += '\n'
-        config += self.vtun_tunnel_name + ' {\n'
-        config += ' passwd ' + str(self.tunnel_key) + ';\n'
-        config += ' persist no;\n'
-        config += ' \n'
-        config += ' up {\n'
-        config += '  ifconfig "%% ' + str(self.tunnel_near_end_ip) + ' pointtopoint ' + str(self.tunnel_far_end_ip) + ' mtu 1450";\n'
-        config += ' };\n'
-        config += '}\n'
+        config += indent_unit + 'timeout 600;' + cr_lf
+        
+        config += indent_unit + 'ppp /usr/sbin/pppd;' + cr_lf
+        config += indent_unit + 'ifconfig /sbin/ifconfig;' + cr_lf
+        config += indent_unit + 'route /sbin/route;' + cr_lf
+        config += indent_unit + 'ip /sbin/ip;' + cr_lf
+        config += '}' + cr_lf
+        config += '' + cr_lf
+        config += self.vtun_tunnel_name + ' {' + cr_lf
+        config += indent_unit + 'passwd ' + str(self.tunnel_key) + ';' + cr_lf
+        config += indent_unit + 'persist no;' + cr_lf
+        config += cr_lf
+        config += indent_unit + 'up {' + cr_lf
+        config += indent_unit * 2  + 'ifconfig "%% ' + str(self.tunnel_near_end_ip) + ' pointtopoint ' + str(self.tunnel_far_end_ip) + ' mtu 1450";' + cr_lf
+        config += indent_unit + '};' + cr_lf
+        config += '}' + cr_lf
         return config
     
     def is_valid(self): # Overload is_valid() for client tunnels... we also need a vtun_server_hostname
