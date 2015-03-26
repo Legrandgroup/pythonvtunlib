@@ -5,6 +5,7 @@
 from __future__ import print_function
 
 import ipaddr
+import re
 
 from tunnel_mode import TunnelMode
 
@@ -75,6 +76,8 @@ class VtunTunnel(object):
         
         \param key A string containing the shared secret for the tunnel
         """
+        if re.compile(r'^[0-9]+$').search(str(key)):
+            raise Exception('SessionSharedSecretCannotBeOnlyDigits')
         self.tunnel_key = key
     
     def set_tunnel_name(self, name):
