@@ -34,14 +34,7 @@ class ClientVtunTunnel(VtunTunnel):
         """
         self.vtun_server_hostname = vtun_server_hostname
     
-    def from_tundev_shell_ouput(self, tundev_shell_config):
-        """ Set this object tunnel parameters from a string following the tundev shell output format of the command 'get_vtun_parameters'
-        \param tundev_shell_config
-        
-        FIXME: move this into ClientVtunTunnel's constructor kwargs
-        """
-        raise Exception('NotYesImplemented')
-    
+       
     def to_vtund_config(self):
         """ Generate a vtund config string matching with this object attributes
         
@@ -68,7 +61,6 @@ class ClientVtunTunnel(VtunTunnel):
         config += ' };\n'
         config += '}\n'
         return config
-        return config_file  # TODO
     
     def is_valid(self): # Overload is_valid() for client tunnels... we also need a vtun_server_hostname
         """ Check if our attributes are enough to define a vtun tunnel
@@ -79,7 +71,3 @@ class ClientVtunTunnel(VtunTunnel):
         if self.vtun_server_hostname is None:
             return False
         return True
-        
-    
-    def from_tundev_shell_output(self, input):
-        raise Exception('NotYetImplemented')    # FIXME: to be implemented
