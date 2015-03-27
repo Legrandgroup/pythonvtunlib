@@ -63,6 +63,8 @@ class VtunTunnel(object):
         """
         if mode is None:
             raise Exception('TunnelModeCannotBeNone')
+        elif mode is 'L3_multi':
+            raise Exception('TunnelModeL3_MultiNotSupportedYet')
         
         self.tunnel_mode = TunnelMode(str(mode))
         self.tunnel_ip_network = ipaddr.IPv4Network(str(tunnel_ip_network))
