@@ -5,6 +5,7 @@
 from __future__ import print_function
 
 from vtun_tunnel import VtunTunnel
+from server_vtun_tunnel import ServerVtunTunnel
 
 class ClientVtunTunnel(VtunTunnel):
     
