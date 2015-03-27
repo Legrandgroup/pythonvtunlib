@@ -21,11 +21,22 @@ class VtunTunnel(object):
         \param tunnel_near_end_ip A string or an ipaddr.IPv4Address object containing our IP address inside the tunnel (near end of the tunnel)
         \param tunnel_far_end_ip A string or an ipaddr.IPv4Address object containing  the IP address of the peer inside the tunnel (far end of the tunnel)
         \param vtun_server_tcp_port (optional, can be set to None if unknown) a string or an int describing the outer TCP port of the process handling the tunnel
+        \param vtun_tunnel_name A string containing the name of the vtun tunnel.
+        \param vtun_shared_secret A string containing the password for the vtun session. 
         """
         self._vtun_pid = None    # The PID of the slave vtun process handling this tunnel
         self._vtun_process = None    # The python process object handling this tunnel
         
-        self.vtun_tunnel_name = None
+        arg_vtun_tunnel_name = kwargs.get('vtun_tunnel_name', None)
+        if arg_vtun_tunnel_name is None:
+            raise Exception('TunnelNameMustBeProvided')
+        else:
+            self.set_tunnel_name(arg_vtun_tunnel_name)
+        arg_tunnel_key = kwargs.get('vtun_shared_secret', None)
+        if arg_tunnel_key is None:
+            raise Exception('TunnelSharedSecretMustBeProvided')
+        else:
+            self.set_shared_secret(arg_tunnel_key)
         arg_mode = kwargs.get('mode', None) # Type of tunnel (L2, L3 or L3_multi)
         arg_tunnel_ip_network = kwargs.get('tunnel_ip_network', None) # IP network (range) for the addressing within the tunnel
         arg_tunnel_near_end_ip = kwargs.get('tunnel_near_end_ip', None) # IP address of the near end of the tunnel (internal to the tunnel)
