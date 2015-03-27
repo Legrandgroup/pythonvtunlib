@@ -5,7 +5,9 @@
 from __future__ import print_function
 
 from vtun_tunnel import VtunTunnel
+
 import subprocess
+
 
 class ClientVtunTunnel(VtunTunnel):
     
@@ -78,7 +80,6 @@ class ClientVtunTunnel(VtunTunnel):
     def start(self):
         """ Start the vtund exec
         """
-        pass #Virtual
         if not (self._vtun_pid is None and self._vtun_process is None):    # There is already a slave vtun process running
             raise Exception('VtundAlreadyRunning')
         
