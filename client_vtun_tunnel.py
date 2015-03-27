@@ -13,6 +13,7 @@ class ClientVtunTunnel(VtunTunnel):
         """ Constructor (see VtunTunnel.__init__ for the inherited kwargs)
         \param from_server Create a vtun client configuration to connect to the ServerVtunTunnel object specified as \p from_server
         \param vtun_server_hostname The hostname or IP address of the vtun server this client will connect to. If not provided at construction, a subsequent call to set_vtun_server_hostname() will be required
+        \param vtun_connection_timeout The timeout limit from the client to connect.
         """
         arg_from_server = kwargs.get('from_server', None) # Server from which we create a client config
         if arg_from_server is None:
@@ -24,6 +25,7 @@ class ClientVtunTunnel(VtunTunnel):
             self.tunnel_key = arg_from_server.tunnel_key
         self.vtun_server_hostname = kwargs.get('vtun_server_hostname', None)  # The remote host to connect to (if provided)
         # Note: in all cases, the caller will need to provide a vtun_server_hostname (it is not part of the ServerVtunTunnel object)
+        self.vtun_connection_timeout = kwargs.get('vtun_connection_timeout', 300) #5Min for default client timeout. Purely arbitary choosen value here. Might change in the future. 
     
     def set_vtun_server_hostname(self, vtun_server_hostname):
         """ Set the remote host to connect to
@@ -45,16 +47,13 @@ class ClientVtunTunnel(VtunTunnel):
         config = ''
         config += 'options {' + cr_lf
         config += indent_unit + 'port ' + str(self.vtun_server_tcp_port) + ';' + cr_lf
-        #FIXME: add vtun_connection_timeout attribute! config += ' timeout ' + str(self.vtun_connection_timeout) + ';\n'
-        
-        config += indent_unit + 'timeout 600;' + cr_lf
-        
+        config += indent_unit + 'timeout ' + str(self.vtun_connection_timeout) + ';' + cr_lf        
         config += indent_unit + 'ppp /usr/sbin/pppd;' + cr_lf
         config += indent_unit + 'ifconfig /sbin/ifconfig;' + cr_lf
         config += indent_unit + 'route /sbin/route;' + cr_lf
         config += indent_unit + 'ip /sbin/ip;' + cr_lf
         config += '}' + cr_lf
-        config += '' + cr_lf
+        config += cr_lf
         config += self.vtun_tunnel_name + ' {' + cr_lf
         config += indent_unit + 'passwd ' + str(self.tunnel_key) + ';' + cr_lf
         config += indent_unit + 'persist no;' + cr_lf
