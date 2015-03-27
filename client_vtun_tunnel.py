@@ -5,6 +5,7 @@
 from __future__ import print_function
 
 from vtun_tunnel import VtunTunnel
+import subprocess
 
 class ClientVtunTunnel(VtunTunnel):
     
@@ -73,3 +74,24 @@ class ClientVtunTunnel(VtunTunnel):
         if self.vtun_server_hostname is None:
             return False
         return True
+    
+    def start(self):
+        """ Start the vtund exec
+        """
+        pass #Virtual
+        if not (self._vtun_pid is None and self._vtun_process is None):    # There is already a slave vtun process running
+            raise Exception('VtundAlreadyRunning')
+        
+        #Step 1: save configuration file
+        vtund_config = self.to_vtund_config()
+        try:
+            f = open('/tmp/vtund-%s-client.conf'%self.vtun_tunnel_name, 'w')
+            f.write(vtund_config)
+            f.close()
+        except:
+            raise Exception('ConfigurationFileritingIssue')
+        #Step 2: Runs vtun and saves the pid and process
+        proc = subprocess.Popen(["vtund", "-f", "/tmp/vtund-%s-client.conf"%str(self.vtun_tunnel_name), str(self.vtun_tunnel_name), str(self.vtun_server_hostname)], shell=False)
+        self._vtun_process = proc
+        self._vtun_pid = proc.pid
+        #TODO: Add a watch to detect when the tunnel goes down
