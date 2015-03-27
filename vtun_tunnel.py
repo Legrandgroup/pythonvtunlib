@@ -6,6 +6,7 @@ from __future__ import print_function
 
 import ipaddr
 import re
+import subprocess
 
 from tunnel_mode import TunnelMode
 
@@ -147,6 +148,10 @@ class VtunTunnel(object):
         print('Debug: will stop vtun')
         #raise Exception('NotYetImplemented')
 
-
+    def get_child_of(pid):
+        p = subprocess.Popen('pgrep -P %d'%pid,stdout=subprocess.PIPE,shell=True)
+        children_pid  = [x for x in p.communicate()[0].split("\n") if x and x != str(p.pid)]
+        p.wait()
+        return children_pid
 
 
