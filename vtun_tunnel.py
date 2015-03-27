@@ -131,14 +131,7 @@ class VtunTunnel(object):
     def start(self):
         """ Start the vtund exec (generic for server or client)
         """
-        if not (self._vtun_pid is None and self._vtun_process is None):    # There is already a slave vtun process running
-            raise Exception('VtundAlreadyRunning')
-        vtund_config = self.to_vtund_config()
-        print('Debug: will use the following vtund config:')
-        print(vtund_config)
-        # Save into a file
-        # Run the process on the file
-        #raise Exception('NotYetImplemented')
+        pass #Virtual
     
     def stop(self):
         """ Start the vtund exec (generic for server or client)
