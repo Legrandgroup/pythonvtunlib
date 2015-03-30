@@ -9,6 +9,7 @@ from vtun_tunnel import VtunTunnel
 import subprocess
 import os
 import signal
+from __builtin__ import False
 
 vtun_pid_file = '/usr/local/var/run/vtund.pid'
 
@@ -131,12 +132,17 @@ class ServerVtunTunnel(VtunTunnel):
                         except OSError:
                             print(child + 'is not  Killed')
                 
+            success = True
+            try:
+                os.kill(int(self._vtun_pid), signal.SIGTERM)
+                print(self._vtun_pid + ' Killed')
+            except OSError:
                 try:
-                    os.kill(int(self._vtun_pid), signal.SIGTERM)
+                    os.kill(int(self._vtun_pid), signal.SIGKILL)
                     print(self._vtun_pid + ' Killed')
                 except OSError:
-                    try:
-                        os.kill(int(self._vtun_pid), signal.SIGKILL)
-                        print(self._vtun_pid + ' Killed')
-                    except OSError:
-                        print(self._vtun_pid + ' is not Killed')
+                    print(self._vtun_pid + ' is not Killed')
+                    success = False
+            if success:
+                self._vtun_pid = None
+                self._vtun_process = None
