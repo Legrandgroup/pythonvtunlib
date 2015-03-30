@@ -7,6 +7,10 @@ from __future__ import print_function
 from vtun_tunnel import VtunTunnel
 
 import subprocess
+import os
+import signal
+
+vtun_pid_file = '/usr/local/var/run/vtund.pid'
 
 class ServerVtunTunnel(VtunTunnel):
     """ Class representing a vtun tunnel service (listening) """
@@ -95,11 +99,44 @@ class ServerVtunTunnel(VtunTunnel):
             raise Exception('ConfigurationFileWritingIssue')
         #Step 2: Runs vtun and saves the pid and process
         proc = subprocess.Popen(["vtund", "-f", "/tmp/vtund-%s-server.conf"%str(self.vtun_tunnel_name), "-s"], shell=False)
-        self._vtun_process = proc
-        self._vtun_pid = proc.pid
+        
+        pid = None
+        if os.path.isfile(vtun_pid_file):
+            os.remove(vtun_pid_file)
+            while not os.path.isfile(vtun_pid_file):
+                continue
+        pid_file = open(vtun_pid_file, "r")
+        pid = pid_file.read(10)
+        pid_file.close()
+        self._vtun_pid = pid
         #TODO: Add a watch to detect when the tunnel goes down
     
     def stop(self):
         """ Stop the vtun server process handled by this object
         """
-        print('Stopping vtun server with tunnel name ' + str(self.vtun_tunnel_name) + ' (doing nothing)!')
+        print('Stopping vtun server with tunnel name ' + str(self.vtun_tunnel_name) + '\n')
+        if self._vtun_pid is None:    # There is not a slave vtun process running
+            raise Exception('VtundNotRunning')
+        else:
+            children = self.get_child_of(int(self._vtun_pid))
+            if len(children) > 0:
+                for child in children:
+                    try:
+                        os.kill(int(child), signal.SIGTERM)
+                        print(child + ' Killed')
+                    except OSError:
+                        try:
+                            os.kill(int(child), signal.SIGKILL)
+                            print(child + ' Killed')
+                        except OSError:
+                            print(child + 'is not  Killed')
+                
+                try:
+                    os.kill(int(self._vtun_pid), signal.SIGTERM)
+                    print(self._vtun_pid + ' Killed')
+                except OSError:
+                    try:
+                        os.kill(int(self._vtun_pid), signal.SIGKILL)
+                        print(self._vtun_pid + ' Killed')
+                    except OSError:
+                        print(self._vtun_pid + ' is not Killed')
