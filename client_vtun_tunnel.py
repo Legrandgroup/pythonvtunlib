@@ -95,3 +95,12 @@ class ClientVtunTunnel(VtunTunnel):
         self._vtun_process = proc
         self._vtun_pid = proc.pid
         #TODO: Add a watch to detect when the tunnel goes down
+
+    def stop(self):
+        if self._vtun_pid is None or self._vtun_process is None:
+            raise Exception('VtundNotRunning')
+        else:
+            self._vtun_process.terminate()
+            self._vtun_process.wait()
+            self._vtun_pid = None
+            self._vtun_process = None
