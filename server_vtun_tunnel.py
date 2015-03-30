@@ -6,6 +6,8 @@ from __future__ import print_function
 
 from vtun_tunnel import VtunTunnel
 
+import subprocess
+
 class ServerVtunTunnel(VtunTunnel):
     """ Class representing a vtun tunnel service (listening) """
     
@@ -77,13 +79,27 @@ class ServerVtunTunnel(VtunTunnel):
         config += '}' + cr_lf
         return config
         
-        def start(self):
-            """ Start a vtun server process to handle the service represented by this object
-            """
-            print('Starting vtun server with tunnel name ' + str(self.vtun_tunnel_name) + ' (doing nothing)!')
-            print('Config file for vtund would be "' + self.to_vtund_config() + '"')
-        
-        def stop(self):
-            """ Stop the vtun server process handled by this object
-            """
-            print('Stopping vtun server with tunnel name ' + str(self.vtun_tunnel_name) + ' (doing nothing)!')
+    def start(self):
+        """ Start a vtun server process to handle the service represented by this object
+        """
+        if not (self._vtun_pid is None and self._vtun_process is None):    # There is already a slave vtun process running
+            raise Exception('VtundAlreadyRunning')
+    
+        #Step 1: save configuration file
+        vtund_config = self.to_vtund_config()
+        try:
+            f = open('/tmp/vtund-%s-server.conf'%self.vtun_tunnel_name, 'w')
+            f.write(vtund_config)
+            f.close()
+        except:
+            raise Exception('ConfigurationFileritingIssue')
+        #Step 2: Runs vtun and saves the pid and process
+        proc = subprocess.Popen(["vtund", "-f", "/tmp/vtund-%s-server.conf"%str(self.vtun_tunnel_name), "-s"], shell=False)
+        self._vtun_process = proc
+        self._vtun_pid = proc.pid
+        #TODO: Add a watch to detect when the tunnel goes down
+    
+    def stop(self):
+        """ Stop the vtun server process handled by this object
+        """
+        print('Stopping vtun server with tunnel name ' + str(self.vtun_tunnel_name) + ' (doing nothing)!')
