@@ -143,10 +143,7 @@ class VtunTunnel(object):
     def stop(self):
         """ Start the vtund exec (generic for server or client)
         """
-        # Check PID and subprocess
-        # Kill them, remove the temporary config file
-        print('Debug: will stop vtun')
-        #raise Exception('NotYetImplemented')
+        pass #Virtual
 
     def get_child_of(self, pid):
         p = subprocess.Popen('pgrep -P %d'%pid,stdout=subprocess.PIPE,shell=True)
