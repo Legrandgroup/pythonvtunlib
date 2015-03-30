@@ -92,7 +92,7 @@ class ServerVtunTunnel(VtunTunnel):
             f.write(vtund_config)
             f.close()
         except:
-            raise Exception('ConfigurationFileritingIssue')
+            raise Exception('ConfigurationFileWritingIssue')
         #Step 2: Runs vtun and saves the pid and process
         proc = subprocess.Popen(["vtund", "-f", "/tmp/vtund-%s-server.conf"%str(self.vtun_tunnel_name), "-s"], shell=False)
         self._vtun_process = proc
