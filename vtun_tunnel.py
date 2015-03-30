@@ -33,11 +33,11 @@ class VtunTunnel(object):
             raise Exception('TunnelNameMustBeProvided')
         else:
             self.set_tunnel_name(arg_vtun_tunnel_name)
-        arg_tunnel_key = kwargs.get('vtun_shared_secret', None)
-        if arg_tunnel_key is None:
+        arg_vtun_shared_secret = kwargs.get('vtun_shared_secret', None)
+        if arg_vtun_shared_secret is None:
             raise Exception('TunnelSharedSecretMustBeProvided')
         else:
-            self.set_shared_secret(arg_tunnel_key)
+            self.set_shared_secret(arg_vtun_shared_secret)
         arg_mode = kwargs.get('mode', None) # Type of tunnel (L2, L3 or L3_multi)
         arg_tunnel_ip_network = kwargs.get('tunnel_ip_network', None) # IP network (range) for the addressing within the tunnel
         arg_tunnel_near_end_ip = kwargs.get('tunnel_near_end_ip', None) # IP address of the near end of the tunnel (internal to the tunnel)
@@ -92,7 +92,14 @@ class VtunTunnel(object):
         """
         if re.compile(r'^[0-9]+$').search(str(key)):
             raise Exception('SessionSharedSecretCannotBeOnlyDigits')
-        self.tunnel_key = key
+        self.vtun_shared_secret = key
+    
+    def get_shared_secret(self):
+        """ Get the shared secret for the tunnel
+        
+        \return A string containing the shared secret for the tunnel
+        """
+        return self.vtun_shared_secret
     
     def set_tunnel_name(self, name):
         """ Set the vtun tunnel name
@@ -116,7 +123,7 @@ class VtunTunnel(object):
             return False
         if self.tunnel_far_end_ip is None:
             return False
-        if self.tunnel_key is None:
+        if self.vtun_shared_secret is None:
             return False
         if self.vtun_tunnel_name is None:
             return False

@@ -53,7 +53,7 @@ class ServerVtunTunnel(VtunTunnel):
         config += '}' + cr_lf
         config += cr_lf
         config += self.vtun_tunnel_name + ' {' + cr_lf
-        config += indent_unit + 'passwd ' + str(self.tunnel_key) + ';' + cr_lf
+        config += indent_unit + 'passwd ' + str(self.vtun_shared_secret) + ';' + cr_lf
         config += indent_unit + 'type ' + self.tunnel_mode.get_equivalent_vtun_type() + ';' + cr_lf
         config += indent_unit + 'proto ' + self.vtun_protocol + ';' + cr_lf
         config += indent_unit + 'compress ' + self.vtun_compression + ';' + cr_lf
