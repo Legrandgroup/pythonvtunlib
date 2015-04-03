@@ -84,14 +84,15 @@ class ClientVtunTunnel(VtunTunnel):
         
         #Step 1: save configuration file
         vtund_config = self.to_vtund_config()
+        vtund_config_filename = '/tmp/vtund-' + str(self.vtun_tunnel_name) + '-client.conf'
         try:
-            f = open('/tmp/vtund-%s-client.conf'%self.vtun_tunnel_name, 'w')
+            f = open(vtund_config_filename, 'w')
             f.write(vtund_config)
             f.close()
         except:
             raise Exception('ConfigurationFileWritingIssue')
         #Step 2: Runs vtun and saves the pid and process
-        proc = subprocess.Popen(["vtund", "-f", "/tmp/vtund-%s-client.conf"%str(self.vtun_tunnel_name), str(self.vtun_tunnel_name), str(self.vtun_server_hostname)], shell=False)
+        proc = subprocess.Popen([VtunTunnel.VTUND_EXEC, '-f', vtund_config_filename, str(self.vtun_tunnel_name), str(self.vtun_server_hostname)], shell=False)
         self._vtun_process = proc
         self._vtun_pid = proc.pid
         #TODO: Add a watch to detect when the tunnel goes down

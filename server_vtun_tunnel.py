@@ -10,7 +10,7 @@ import subprocess
 import os
 import signal
 import socket
-import time 
+import time
 
 vtun_pid_file = '/usr/local/var/run/vtund.pid'
 
@@ -93,14 +93,15 @@ class ServerVtunTunnel(VtunTunnel):
     
         #Step 1: save configuration file
         vtund_config = self.to_vtund_config()
+        vtund_config_filename = '/tmp/vtund-' + self.vtun_tunnel_name + '-server.conf'
         try:
-            f = open('/tmp/vtund-%s-server.conf'%self.vtun_tunnel_name, 'w')
+            f = open(vtund_config_filename, 'w')
             f.write(vtund_config)
             f.close()
         except:
             raise Exception('ConfigurationFileWritingIssue')
         #Step 2: Runs vtun and saves the pid and process
-        proc = subprocess.Popen(["vtund", "-f", "/tmp/vtund-%s-server.conf"%str(self.vtun_tunnel_name), "-s"], shell=False)
+        proc = subprocess.Popen([VtunTunnel.VTUND_EXEC, '-f', vtund_config_filename, '-s'], shell=False)
         
         pid = None
         if os.path.isfile(vtun_pid_file):

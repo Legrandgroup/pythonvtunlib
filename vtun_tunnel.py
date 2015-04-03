@@ -13,6 +13,8 @@ from tunnel_mode import TunnelMode
 class VtunTunnel(object):
     """ Class representing a vtun tunnel """
     
+    VTUND_EXEC = '/usr/local/sbin/vtund'
+    
     def __init__(self, **kwargs):
         """ Constructor for VtunTunnel class.
         
