@@ -24,7 +24,7 @@ class ClientVtunTunnel(VtunTunnel):
         else:   # We are building the client config to match a server config
             if not isinstance(arg_from_server, server_vtun_tunnel.ServerVtunTunnel):
                 raise Exception('WrongFromServerObject')
-            super(ClientVtunTunnel, self).__init__(mode =  arg_from_server.tunnel_mode, tunnel_ip_network = arg_from_server.tunnel_ip_network, tunnel_near_end_ip = arg_from_server.tunnel_far_end_ip, tunnel_far_end_ip = arg_from_server.tunnel_near_end_ip, vtun_server_tcp_port = arg_from_server.vtun_server_tcp_port, vtun_tunnel_name = arg_from_server.vtun_tunnel_name, vtun_shared_secret = arg_from_server.vtun_shared_secret)
+            super(ClientVtunTunnel, self).__init__(vtund_exec = arg_from_server.vtund_exec, mode = arg_from_server.tunnel_mode, tunnel_ip_network = arg_from_server.tunnel_ip_network, tunnel_near_end_ip = arg_from_server.tunnel_far_end_ip, tunnel_far_end_ip = arg_from_server.tunnel_near_end_ip, vtun_server_tcp_port = arg_from_server.vtun_server_tcp_port, vtun_tunnel_name = arg_from_server.vtun_tunnel_name, vtun_shared_secret = arg_from_server.vtun_shared_secret)
         self.vtun_server_hostname = kwargs.get('vtun_server_hostname', None)  # The remote host to connect to (if provided)
         # Note: in all cases, the caller will need to provide a vtun_server_hostname (it is not part of the ServerVtunTunnel object)
         self.vtun_connection_timeout = kwargs.get('vtun_connection_timeout', 300) #5Min for default client timeout. Purely arbitary choosen value here. Might change in the future. 
