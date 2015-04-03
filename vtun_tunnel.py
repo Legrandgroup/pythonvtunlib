@@ -13,11 +13,12 @@ from tunnel_mode import TunnelMode
 class VtunTunnel(object):
     """ Class representing a vtun tunnel """
     
-    VTUND_EXEC = '/usr/local/sbin/vtund'
+    VTUND_EXEC = 'vtund'
     
     def __init__(self, **kwargs):
         """ Constructor for VtunTunnel class.
         
+        \param vtund_exec The exec name for the vtund utility (it is recommended to provide an absolute PATH here)
         \param tundev_shell_config A string directly coming from the devshell command 'get_vtun_parameters', that will allow to set all the attributes of this object. Warning if tundev_shell_config is provided, no other argument below is allowed (or a 'SimultaneousConfigAndAgumentsNotAllowed' exception will be raised)
         \param mode A string or a TunnelMode object representing the tunnel mode. Supported values are L2, L3 and L3_multi
         \param tunnel_ip_network A string or an ipaddr.IPv4Network object containing the IP network range in use within the tunnel
@@ -29,6 +30,12 @@ class VtunTunnel(object):
         """
         self._vtun_pid = None    # The PID of the slave vtun process handling this tunnel
         self._vtun_process = None    # The python process object handling this tunnel
+        
+        arg_vtund_exec = kwargs.get('vtund_exec', None)
+        if arg_vtund_exec is None:
+            self.vtund_exec = VtunTunnel.VTUND_EXEC
+        else:
+            self.vtund_exec = arg_vtund_exec
         
         arg_vtun_tunnel_name = kwargs.get('vtun_tunnel_name', None)
         if arg_vtun_tunnel_name is None:

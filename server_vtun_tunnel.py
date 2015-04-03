@@ -101,7 +101,7 @@ class ServerVtunTunnel(VtunTunnel):
         except:
             raise Exception('ConfigurationFileWritingIssue')
         #Step 2: Runs vtun and saves the pid and process
-        proc = subprocess.Popen([VtunTunnel.VTUND_EXEC, '-f', vtund_config_filename, '-s'], shell=False)
+        proc = subprocess.Popen([self.vtund_exec, '-f', vtund_config_filename, '-s'], shell=False)
         
         pid = None
         if os.path.isfile(vtun_pid_file):

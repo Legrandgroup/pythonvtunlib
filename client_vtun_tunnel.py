@@ -92,7 +92,7 @@ class ClientVtunTunnel(VtunTunnel):
         except:
             raise Exception('ConfigurationFileWritingIssue')
         #Step 2: Runs vtun and saves the pid and process
-        proc = subprocess.Popen([VtunTunnel.VTUND_EXEC, '-f', vtund_config_filename, str(self.vtun_tunnel_name), str(self.vtun_server_hostname)], shell=False)
+        proc = subprocess.Popen([self.vtund_exec, '-f', vtund_config_filename, str(self.vtun_tunnel_name), str(self.vtun_server_hostname)], shell=False)
         self._vtun_process = proc
         self._vtun_pid = proc.pid
         #TODO: Add a watch to detect when the tunnel goes down
