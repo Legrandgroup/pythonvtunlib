@@ -122,12 +122,35 @@ class ClientVtunTunnel(VtunTunnel):
         self._vtund_output_watcher_thread.setDaemon(True) # _vtundd_output_watcher should be forced to terminate when main program exits
         self._vtund_output_watcher_thread.start()
     
+    def _checkPid(self, pid):
+        """ Check For the existence of a UNIX PID
+        """
+        try:
+            os.kill(pid, 0)
+        except OSError:
+            return False
+        else:
+            return True
+            
     def stop(self):
         if self._vtun_pid is None or self._vtun_process is None:
             raise Exception('VtundNotRunning')
         else:
             self._vtun_process_exit_expected.set()  # We are killing the subprocess, so expect it to exit
-            self._vtun_process.terminate()
+            if self.vtund_use_sudo:
+                pid = self._vtun_pid
+                if not self._vtun_pid is None and pid != 1:
+                    args = ['sudo', 'kill', '-SIGINT', str(pid)] # Send Ctrl+C to slave DHCP client process
+                    subprocess.call(args, stdout=open(os.devnull, 'wb'), stderr=subprocess.STDOUT)
+                    while self._checkPid(pid): # Loop if slave process is still running
+                        time.sleep(0.1)
+                        timeout -= 0.1
+                        if timeout <= 0: # We have reached timeout... send a SIGKILL to the slave process to force termination
+                            args = ['sudo', 'kill', '-SIGKILL', str(pid)] # Send Ctrl+C to slave DHCP client process
+                            subprocess.call(args, stdout=open(os.devnull, 'wb'), stderr=subprocess.STDOUT)
+                            break
+            else:
+                self._vtun_process.terminate()
             self._vtun_process.wait()
             self._vtun_pid = None
             self._vtun_process = None
@@ -138,23 +161,26 @@ class ClientVtunTunnel(VtunTunnel):
         if self._vtund_output_buf or self._vtun_process is None:
             raise Exception('SubprocessOutputNotReady')
         
-        while True:
-            new_output = self._vtun_process.stdout.read(1)
-            if new_output == '':
-                poll_result = self._vtun_process.poll()
-                if poll_result is None:   # Process actually died
-                    self.vtund_exit_value = poll_result    # Store exit value
-                    if self._vtun_process_exit_expected.is_set():   # We have been informed that the subprocess would exit, so this is expected
-                        del self._vtun_process_exit_expected    # Remove this event from attributes
-                        self._vtun_pid = None   # Forget about slave... it is not running anymore
-                        self._vtun_process = None
-                        break   # No need to continue parsing output, process has exitted
-                    else:   # Subprocess died unexpectedly
-                        raise Exception('SubprocessDiedUnexpectedly')
-                else:   # Got eof but process is still alive
-                    raise Exception('GotEofFromSubprocess')
-            else:
-                self._vtund_output_buf += new_output    # Continue building output buffer
+        try:
+            while True:
+                new_output = self._vtun_process.stdout.read(1)
+                if new_output == '':
+                    poll_result = self._vtun_process.poll()
+                    if poll_result is None:   # Process actually died
+                        self.vtund_exit_value = poll_result    # Store exit value
+                        if self._vtun_process_exit_expected.is_set():   # We have been informed that the subprocess would exit, so this is expected
+                            del self._vtun_process_exit_expected    # Remove this event from attributes
+                            self._vtun_pid = None   # Forget about slave... it is not running anymore
+                            self._vtun_process = None
+                            break   # No need to continue parsing output, process has exitted
+                        else:   # Subprocess died unexpectedly
+                            raise Exception('SubprocessDiedUnexpectedly')
+                    else:   # Got eof but process is still alive
+                        raise Exception('GotEofFromSubprocess')
+                else:
+                    self._vtund_output_buf += new_output    # Continue building output buffer
+        except AttributeError:    # AttributeError NoneType exceptions happen when our objects were deleted (subprocessed was killed) while in the loop
+            pass    # Just discard and exit the thread
         
     def get_output(self):
         """ Get the console output (stdout and stderr) from the child vtund process
