@@ -90,7 +90,10 @@ class ServerVtunTunnel(VtunTunnel):
         """
         if not (self._vtun_pid is None and self._vtun_process is None):    # There is already a slave vtun process running
             raise Exception('VtundAlreadyRunning')
-    
+        
+        if not self.is_valid():
+                raise Exception('InvalidTunnelConfiguration')
+        
         #Step 1: save configuration file
         vtund_config = self.to_vtund_config()
         vtund_config_filename = '/tmp/vtund-' + self.vtun_tunnel_name + '-server.conf'
