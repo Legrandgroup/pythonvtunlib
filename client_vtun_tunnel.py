@@ -9,6 +9,8 @@ import server_vtun_tunnel
 
 import subprocess
 
+import threading
+
 import os
 
 class ClientVtunTunnel(VtunTunnel):
@@ -30,7 +32,11 @@ class ClientVtunTunnel(VtunTunnel):
         self.vtun_server_hostname = kwargs.get('vtun_server_hostname', None)  # The remote host to connect to (if provided)
         # Note: in all cases, the caller will need to provide a vtun_server_hostname (it is not part of the ServerVtunTunnel object)
         self.vtun_connection_timeout = kwargs.get('vtun_connection_timeout', 300) # 5Min for default client timeout. Purely arbitary choosen value here. Might change in the future.
-        self._vtun_output_buf = None    # Attribute containing the console output of the child process
+        self._vtund_output_buf = None    # Attribute containing the console output of the child process
+        self._vtund_output_watcher_thread = None    # A thread to watch the console output and store it inside  self._vtund_output_buf above
+        self._vtun_process = None
+        self._vtun_pid = None
+        self.vtund_exit_value = None
     
     def set_vtun_server_hostname(self, vtun_server_hostname):
         """ Set the remote host to connect to
@@ -102,7 +108,6 @@ class ClientVtunTunnel(VtunTunnel):
             raise Exception('ConfigurationFileWritingIssue')
         
         #Step 2: Runs vtun and saves the pid and process
-        self._vtun_output_buf = ''
         vtund_cmd = []
         if self.vtund_use_sudo:
                 vtund_cmd = ['sudo']
@@ -110,29 +115,51 @@ class ClientVtunTunnel(VtunTunnel):
         proc = subprocess.Popen(vtund_cmd, shell=False, stdin=open(os.devnull, "r"), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         self._vtun_process = proc
         self._vtun_pid = proc.pid
+        self._vtund_output_buf = ''
+        self._vtun_process_exit_expected = threading.Event()
+        self.vtund_exit_value = None
+        self._vtund_output_watcher_thread = threading.Thread(target = self._vtund_output_watcher)
+        self._vtund_output_watcher_thread.setDaemon(True) # _vtundd_output_watcher should be forced to terminate when main program exits
+        self._vtund_output_watcher_thread.start()
         #TODO: Add a watch to detect when the tunnel goes down
     
     def stop(self):
         if self._vtun_pid is None or self._vtun_process is None:
             raise Exception('VtundNotRunning')
         else:
+            self._vtun_process_exit_expected.set()  # We are killing the subprocess, so expect it to exit
             self._vtun_process.terminate()
             self._vtun_process.wait()
             self._vtun_pid = None
             self._vtun_process = None
     
+    def _vtund_output_watcher(self):
+        """ Watch the output of the vtund subprocess and store it in a buffer
+        """
+        if self._vtund_output_buf or self._vtun_process is None:
+            raise Exception('SubprocessOutputNotReady')
+        
+        while True:
+            new_output = self._vtun_process.stdout.read(1)
+            if new_output == '':
+                poll_result = self._vtun_process.poll()
+                if poll_result is None:   # Process actually died
+                    self.vtund_exit_value = poll_result    # Store exit value
+                    if self._vtun_process_exit_expected.is_set():   # We have been informed that the subprocess would exit, so this is expected
+                        del self._vtun_process_exit_expected    # Remove this event from attributes
+                        self._vtun_pid = None   # Forget about slave... it is not running anymore
+                        self._vtun_process = None
+                        break   # No need to continue parsing output, process has exitted
+                    else:   # Subprocess died unexpectedly
+                        raise Exception('SubprocessDiedUnexpectedly')
+                else:   # Got eof but process is still alive
+                    raise Exception('GotEofFromSubprocess')
+            else:
+                self._vtund_output_buf += new_output    # Continue building output buffer
+        
     def get_output(self):
         """ Get the console output (stdout and stderr) from the child vtund process
         
-        This should be called before .stop() of we will not be able to retreive the output
         \return A string containing the full output (or None if we could not get the output)
         """
-        if not self._vtun_output_buf is None and not self._vtun_process is None:
-            while True:
-                new = self._vtun_process.stdout.read(1)
-                if new == '' and self._vtun_process.poll() != None:
-                    break
-                if new != '':
-                    self._vtun_output_buf += new
-            return self._vtun_output_buf
-        return None
+        return self._vtund_output_buf
