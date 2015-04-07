@@ -18,7 +18,8 @@ class VtunTunnel(object):
     def __init__(self, **kwargs):
         """ Constructor for VtunTunnel class.
         
-        \param vtund_exec The exec name for the vtund utility (it is recommended to provide an absolute PATH here)
+        \param vtund_exec (optional) The exec name for the vtund utility (it is recommended to provide an absolute PATH here)
+        \param vtund_use_sudo (optional) A boolean indicating whether the vtund_exec needs to be run via sudo to get root access (False by default)
         \param tundev_shell_config A string directly coming from the devshell command 'get_vtun_parameters', that will allow to set all the attributes of this object. Warning if tundev_shell_config is provided, no other argument below is allowed (or a 'SimultaneousConfigAndAgumentsNotAllowed' exception will be raised)
         \param mode A string or a TunnelMode object representing the tunnel mode. Supported values are L2, L3 and L3_multi
         \param tunnel_ip_network A string or an ipaddr.IPv4Network object containing the IP network range in use within the tunnel
@@ -36,6 +37,8 @@ class VtunTunnel(object):
             self.vtund_exec = VtunTunnel.VTUND_EXEC
         else:
             self.vtund_exec = arg_vtund_exec
+        
+        self.vtund_use_sudo = kwargs.get('vtund_use_sudo', False)  # Do we use sudo to run subprocess vtund?
         
         arg_vtun_tunnel_name = kwargs.get('vtun_tunnel_name', None)
         if arg_vtun_tunnel_name is None:

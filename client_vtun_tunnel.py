@@ -103,7 +103,11 @@ class ClientVtunTunnel(VtunTunnel):
         
         #Step 2: Runs vtun and saves the pid and process
         self._vtun_output_buf = ''
-        proc = subprocess.Popen([self.vtund_exec, '-n', '-f', vtund_config_filename, str(self.vtun_tunnel_name), str(self.vtun_server_hostname)], shell=False, stdin=open(os.devnull, "r"), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        vtund_cmd = []
+        if self.vtund_use_sudo:
+                vtund_cmd = ['sudo']
+        vtund_cmd += [self.vtund_exec, '-n', '-f', vtund_config_filename, str(self.vtun_tunnel_name), str(self.vtun_server_hostname)]
+        proc = subprocess.Popen(vtund_cmd, shell=False, stdin=open(os.devnull, "r"), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         self._vtun_process = proc
         self._vtun_pid = proc.pid
         #TODO: Add a watch to detect when the tunnel goes down
