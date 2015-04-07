@@ -121,7 +121,6 @@ class ClientVtunTunnel(VtunTunnel):
         self._vtund_output_watcher_thread = threading.Thread(target = self._vtund_output_watcher)
         self._vtund_output_watcher_thread.setDaemon(True) # _vtundd_output_watcher should be forced to terminate when main program exits
         self._vtund_output_watcher_thread.start()
-        #TODO: Add a watch to detect when the tunnel goes down
     
     def stop(self):
         if self._vtun_pid is None or self._vtun_process is None:
