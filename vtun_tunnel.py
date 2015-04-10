@@ -171,13 +171,13 @@ class VtunTunnel(object):
         self.interface_name = interface_name
 
     def add_up_command(self, command):
-        if self.up_additionnal_commands is None
+        if self.up_additionnal_commands is None:
             self.up_additionnal_commands = []
 
         self.up_additionnal_commands += [command]
         
     def add_down_command(self, command):
-        if self.down_additionnal_commands is None
+        if self.down_additionnal_commands is None:
             self.down_additionnal_commands = []
 
         self.down_additionnal_commands += [command]

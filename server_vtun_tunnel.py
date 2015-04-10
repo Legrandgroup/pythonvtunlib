@@ -60,7 +60,7 @@ class ServerVtunTunnel(VtunTunnel):
         config += '}' + cr_lf
         config += cr_lf
         config += self.vtun_tunnel_name + ' {' + cr_lf
-        if not self.device_name is None:
+        if not self.interface_name is None:
             config += indent_unit + 'device ' + str(self.interface_name) + ';' + cr_lf
         config += indent_unit + 'passwd ' + str(self.vtun_shared_secret) + ';' + cr_lf
         config += indent_unit + 'type ' + self.tunnel_mode.get_equivalent_vtun_type() + ';' + cr_lf
