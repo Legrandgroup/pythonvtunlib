@@ -142,8 +142,10 @@ class VtunTunnel(object):
         # Note: vtun_server_tcp_port is not stricly required to define a valid the tunnel (but it will be to start it)
         return True
     
-    def to_vtund_config(self):
+    def to_vtund_config(self, up_additionnal_commands = None, down_additionnal_commands = None):
         """ Generate a vtund config matching with the state of this object and return it as a string
+        \param up_additionnal_commands A list of commands to add to the up {} section of the configuration file
+        \param down_additionnal_commands A list of commands to add to the down {} section of the configuration file
         """
         pass    # 'virtual' method
     
