@@ -56,6 +56,10 @@ class VtunTunnel(object):
         arg_tunnel_far_end_ip = kwargs.get('tunnel_far_end_ip', None) # IP address of the far end of the tunnel (internal to the tunnel)
         arg_vtun_server_tcp_port = kwargs.get('vtun_server_tcp_port', None)   # TCP port on which to connect on the tunnel server machine
 
+        self.interface_name = None              #interface_name The name to give to the tunnel network interface
+        self.up_additionnal_commands = None     #up_additionnal_commands A list of commands to add to the up {} section of the configuration file
+        self.down_additionnal_commands = None   #down_additionnal_commands A list of commands to add to the down {} section of the configuration file
+        
         arg_tundev_shell_config = kwargs.get('tundev_shell_config', None)  # Check if there is a tundev_shell_config argument
         if arg_tundev_shell_config:    # If so, we will generate set our attributes according to the config
             if not (arg_tunnel_ip_network is None and arg_tunnel_near_end_ip is None and arg_tunnel_far_end_ip is None and vtun_server_tcp_port is None):    # We also have a specific argument
@@ -142,11 +146,8 @@ class VtunTunnel(object):
         # Note: vtun_server_tcp_port is not stricly required to define a valid the tunnel (but it will be to start it)
         return True
     
-    def to_vtund_config(self, up_additionnal_commands = None, down_additionnal_commands = None, interface_name = None):
+    def to_vtund_config(self):
         """ Generate a vtund config matching with the state of this object and return it as a string
-        \param up_additionnal_commands A list of commands to add to the up {} section of the configuration file
-        \param down_additionnal_commands A list of commands to add to the down {} section of the configuration file
-        \param interface_name The name to give to the tunnel network interface
         """
         pass    # 'virtual' method
     
@@ -166,4 +167,17 @@ class VtunTunnel(object):
         p.wait()
         return children_pid
 
+    def set_interface_name(self, interface_name):
+        self.interface_name = interface_name
 
+    def add_up_command(self, command):
+        if self.up_additionnal_commands is None
+            self.up_additionnal_commands = []
+
+        self.up_additionnal_commands += [command]
+        
+    def add_down_command(self, command):
+        if self.down_additionnal_commands is None
+            self.down_additionnal_commands = []
+
+        self.down_additionnal_commands += [command]

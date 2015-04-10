@@ -40,11 +40,8 @@ class ServerVtunTunnel(VtunTunnel):
             #~ return False
         #~ return True
 
-    def to_vtund_config(self, up_additionnal_commands = None, down_additionnal_commands = None, interface_name = None):
+    def to_vtund_config(self):
         """ Generate a vtund config string matching with this object attributes
-        \param up_additionnal_commands A list of commands to add to the up {} section of the configuration file
-        \param down_additionnal_commands A list of commands to add to the down {} section of the configuration file
-        \param interface_name The name to give to the tunnel network interface
         \return A string containing a configuration to provide to the vtund exec
         """
         indent_unit = '\t'
@@ -63,8 +60,8 @@ class ServerVtunTunnel(VtunTunnel):
         config += '}' + cr_lf
         config += cr_lf
         config += self.vtun_tunnel_name + ' {' + cr_lf
-        if not device_name is None:
-            config += indent_unit + 'device ' + str(interface_name) + ';' + cr_lf
+        if not self.device_name is None:
+            config += indent_unit + 'device ' + str(self.interface_name) + ';' + cr_lf
         config += indent_unit + 'passwd ' + str(self.vtun_shared_secret) + ';' + cr_lf
         config += indent_unit + 'type ' + self.tunnel_mode.get_equivalent_vtun_type() + ';' + cr_lf
         config += indent_unit + 'proto ' + self.vtun_protocol + ';' + cr_lf
@@ -85,16 +82,16 @@ class ServerVtunTunnel(VtunTunnel):
         config += ' ' + cr_lf
         config += indent_unit + 'up {' + cr_lf
         config += indent_unit*2 + 'ifconfig "%% ' + str(self.tunnel_near_end_ip) + ' pointopoint ' + str(self.tunnel_far_end_ip) + ' mtu 1450";' + cr_lf
-        if not up_additionnal_commands is None:
-            for command in up_additionnal_commands:
+        if not self.up_additionnal_commands is None:
+            for command in self.up_additionnal_commands:
                 if command[0] == '/':
                     config += indent_unit*2 + 'program ' + str(command) + ';' + cr_lf
                 else:
                     raise Exception('NotAFullPathCommand')
         config += indent_unit + '};' + cr_lf
         config += indent_unit + 'down {' + cr_lf
-        if not down_additionnal_commands is None:
-            for command in down_additionnal_commands:
+        if not self.down_additionnal_commands is None:
+            for command in self.down_additionnal_commands:
                 if command[0] == '/':
                     config += indent_unit*2 + 'program ' + str(command) + ';' + cr_lf
                 else:
