@@ -48,10 +48,11 @@ class ClientVtunTunnel(VtunTunnel):
         self.vtun_server_hostname = vtun_server_hostname
     
        
-    def to_vtund_config(self, up_additionnal_commands = None, down_additionnal_commands = None):
+    def to_vtund_config(self, up_additionnal_commands = None, down_additionnal_commands = None, device_name = None):
         """ Generate a vtund config string matching with this object attributes
         \param up_additionnal_commands A list of commands to add to the up {} section of the configuration file
         \param down_additionnal_commands A list of commands to add to the down {} section of the configuration file
+        \param device_name The name to give to the tunnel network interface
         \return A string containing a configuration to provide to the vtund exec
         """
         indent_unit = '\t'
@@ -67,6 +68,8 @@ class ClientVtunTunnel(VtunTunnel):
         config += '}' + cr_lf
         config += cr_lf
         config += self.vtun_tunnel_name + ' {' + cr_lf
+        if not device_name is None:
+            config += indent_unit + 'device ' + str(device_name) + ';' + cr_lf
         config += indent_unit + 'passwd ' + str(self.vtun_shared_secret) + ';' + cr_lf
         config += indent_unit + 'persist no;' + cr_lf
         config += cr_lf
