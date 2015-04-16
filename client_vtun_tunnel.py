@@ -72,16 +72,16 @@ class ClientVtunTunnel(VtunTunnel):
         config += cr_lf
         config += indent_unit + 'up {' + cr_lf
         config += indent_unit * 2  + 'ifconfig "%% ' + str(self.tunnel_near_end_ip) + ' pointopoint ' + str(self.tunnel_far_end_ip) + ' mtu 1450";' + cr_lf
-        if not self.up_additionnal_commands is None:
-            for command in self.up_additionnal_commands:
+        if not self.up_additional_commands is None:
+            for command in self.up_additional_commands:
                 if command[0] == '/':
                     config += indent_unit*2 + 'program ' + str(command) + ';' + cr_lf
                 else:
                     raise Exception('NotAFullPathCommand')
         config += indent_unit + '};' + cr_lf
         config += indent_unit + 'down {' + cr_lf
-        if not self.down_additionnal_commands is None:
-            for command in self.down_additionnal_commands:
+        if not self.down_additional_commands is None:
+            for command in self.down_additional_commands:
                 if command[0] == '/':
                     config += indent_unit*2 + 'program ' + str(command) + ';' + cr_lf
                 else:

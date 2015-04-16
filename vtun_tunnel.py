@@ -57,8 +57,8 @@ class VtunTunnel(object):
         arg_vtun_server_tcp_port = kwargs.get('vtun_server_tcp_port', None)   # TCP port on which to connect on the tunnel server machine
 
         self.interface_name = None              #interface_name The name to give to the tunnel network interface
-        self.up_additionnal_commands = None     #up_additionnal_commands A list of commands to add to the up {} section of the configuration file
-        self.down_additionnal_commands = None   #down_additionnal_commands A list of commands to add to the down {} section of the configuration file
+        self.up_additional_commands = None     #up_additional_commands A list of commands to add to the up {} section of the configuration file
+        self.down_additional_commands = None   #down_additional_commands A list of commands to add to the down {} section of the configuration file
         
         arg_tundev_shell_config = kwargs.get('tundev_shell_config', None)  # Check if there is a tundev_shell_config argument
         if arg_tundev_shell_config:    # If so, we will generate set our attributes according to the config
@@ -171,13 +171,13 @@ class VtunTunnel(object):
         self.interface_name = interface_name
 
     def add_up_command(self, command):
-        if self.up_additionnal_commands is None:
-            self.up_additionnal_commands = []
+        if self.up_additional_commands is None:
+            self.up_additional_commands = []
 
-        self.up_additionnal_commands += [command]
+        self.up_additional_commands += [command]
         
     def add_down_command(self, command):
-        if self.down_additionnal_commands is None:
-            self.down_additionnal_commands = []
+        if self.down_additional_commands is None:
+            self.down_additional_commands = []
 
-        self.down_additionnal_commands += [command]
+        self.down_additional_commands += [command]
