@@ -181,3 +181,9 @@ class VtunTunnel(object):
             self.down_additional_commands = []
 
         self.down_additional_commands += [command]
+        
+    def get_vtun_process(self):
+        if self._vtun_process is None:
+            raise Exception('VtunProcessNotLaunched')
+        
+        return self._vtun_process
