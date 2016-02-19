@@ -178,7 +178,6 @@ class ServerVtunTunnel(VtunTunnel):
                         except OSError:
                             #print(child + 'is not  Killed')
                             success = False
-                
             
             try:
                 os.kill(int(self._vtun_pid), signal.SIGTERM)
